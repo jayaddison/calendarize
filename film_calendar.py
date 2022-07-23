@@ -48,6 +48,7 @@ class Film(object):
         return previous_screening.end + timedelta(minutes=transit_time)
 
 
+# Screenings, sorted by start time
 screenings = [
     Film(begin="2022-08-13 14:00", running_time=120, venue="CAM", title="First"),
     Film(begin="2022-08-13 18:00", running_time=60, venue="FLH", title="Second"),
@@ -69,15 +70,13 @@ for i in range(n):
     for j in range(n):
         if i < j:
             no_overlaps = [
-                screenings[i].begin >= screenings[i].eta_from(screenings[j]),
                 screenings[j].begin >= screenings[j].eta_from(screenings[i]),
             ]
             no_duplicates = [
                 screenings[i].title != screenings[j].title,
             ]
             pair_selected = [appearances[i], appearances[j]]
-            model.AddBoolOr(no_overlaps).OnlyEnforceIf(pair_selected)
-            model.AddBoolAnd(no_duplicates).OnlyEnforceIf(pair_selected)
+            model.AddBoolAnd(no_overlaps + no_duplicates).OnlyEnforceIf(pair_selected)
 
 # Goal: maximize attendance
 model.Add(attendance == sum(appearances))
