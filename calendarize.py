@@ -8,6 +8,7 @@ from ortools.sat.python.cp_model import (
 )
 
 
+# Transit times, assuming travel by bicycle and with a bit of faff time to find parking
 transit_times = {
     "STA": {
         "CAM": 20,
