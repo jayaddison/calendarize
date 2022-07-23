@@ -40,12 +40,12 @@ class Film(object):
         self.end = self.begin + self.running_time
         self.venue = venue
 
-    def eta_from(self, previous_screening: "Film"):
-        if self.venue == previous_screening.venue:
+    def eta_from(self, prev: "Film"):
+        if self.venue == prev.venue:
             transit_time = 5
         else:
-            transit_time = transit_times[previous_screening.venue][self.venue]
-        return previous_screening.end + timedelta(minutes=transit_time)
+            transit_time = transit_times[prev.venue][self.venue]
+        return prev.end + timedelta(minutes=transit_time)
 
 
 # Screenings, sorted by start time
