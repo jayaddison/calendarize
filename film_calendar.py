@@ -150,10 +150,17 @@ class SolutionHandler(CpSolverSolutionCallback):
     def on_solution_callback(self):
         print(f"attendance: {self.Value(attendance)}")
         print(f"appearances: {[self.Value(appearances[i]) for i in range(n)]}")
+        prev = None
         for i in range(n):
             if self.Value(appearances[i]):
-                screening = screenings[i]
-                print(f'"{screening.title}": {screening.begin}..{screening.end}')
+                curr = screenings[i]
+                if prev and prev.begin.date() == curr.begin.date():
+                    transit = "none" if prev.venue == curr.venue else f"{curr.minutes_from(prev)}m to {curr.venue}"
+                    print(f" ... (transit: {transit})", end="")
+                print()
+                print(f'{curr.begin} @ {curr.venue}: "{curr.title}"', end="")
+                prev = curr
+        print()
 
 
 solver = CpSolver()
