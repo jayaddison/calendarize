@@ -155,8 +155,13 @@ class SolutionHandler(CpSolverSolutionCallback):
             if self.Value(appearances[i]):
                 curr = screenings[i]
                 if prev and prev.begin.date() == curr.begin.date():
-                    transit = "none" if prev.venue == curr.venue else f"{curr.minutes_from(prev)}m to {curr.venue}"
-                    print(f" ... (transit: {transit})", end="")
+                    minutes_between = int((curr.begin - prev.end).total_seconds() / 60)
+                    transit_between = curr.minutes_from(prev)
+                    break_between = minutes_between - transit_between
+
+                    transit = "none" if prev.venue == curr.venue else f"{transit_between}m to {curr.venue}"
+                    downtime = "none" if break_between <= 5 else f"{break_between}m"
+                    print(f" ... (transit: {transit}, downtime: {downtime})", end="")
                 print()
                 print(f'{curr.begin} @ {curr.venue}: "{curr.title}"', end="")
                 prev = curr
