@@ -54,13 +54,15 @@ screenings = [
     Film(begin="2022-08-13 14:00", running_time=120, venue="CAM", title="First"),
     Film(begin="2022-08-13 18:00", running_time=60, venue="FLH", title="Second"),
     Film(begin="2022-08-13 19:00", running_time=120, venue="FLH", title="Third"),
+    Film(begin="2022-08-13 19:00", running_time=120, venue="CAM", title="Fourth"),
 ]
 n = len(screenings)
 
 model = CpModel()
 attendance = model.NewIntVar(0, n, "attendance")
 appearances = [model.NewBoolVar(f"appearances[{i}]") for i in range(n)]
-
+commuting = model.NewIntVar(0, 3600, "commuting")
+transits = [model.NewIntVar(0, 30, f"transits[{i}]") for i in range(n)]
 # Constraints:
 #
 #  - Screenings must not overlap
@@ -76,11 +78,16 @@ for i in range(n):
             no_duplicates = [
                 screenings[i].title != screenings[j].title,
             ]
+            transit_time = screenings[j].minutes_from(screenings[i])
             pair_selected = [appearances[i], appearances[j]]
-            model.AddBoolAnd(no_overlaps + no_duplicates).OnlyEnforceIf(pair_selected)
 
-# Goal: maximize attendance
+            model.AddBoolAnd(no_overlaps + no_duplicates).OnlyEnforceIf(pair_selected)
+            model.Add(transits[j] == transit_time).OnlyEnforceIf(pair_selected)
+
 model.Add(attendance == sum(appearances))
+model.Add(commuting == sum(transits))
+
+# Goal 1: maximize attendance
 model.Maximize(attendance)
 
 
@@ -88,6 +95,8 @@ class SolutionHandler(CpSolverSolutionCallback):
     def on_solution_callback(self):
         print(f"attendance: {self.Value(attendance)}")
         print(f"appearances: {[self.Value(appearances[i]) for i in range(n)]}")
+        print(f"commuting: {self.Value(commuting)}")
+        print(f"transits: {[self.Value(transits[i]) for i in range(n)]}")
         for i in range(n):
             if self.Value(appearances[i]):
                 screening = screenings[i]
@@ -95,4 +104,13 @@ class SolutionHandler(CpSolverSolutionCallback):
 
 
 solver = CpSolver()
+solver.Solve(model, solution_callback=SolutionHandler())
+
+# Fix attendance level
+model.Add(attendance == solver.Value(attendance))
+
+# Goal 2: minimize commuting
+model.Minimize(commuting)
+
+# Solve to minimize commuting
 solver.Solve(model, solution_callback=SolutionHandler())
