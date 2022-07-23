@@ -9,27 +9,40 @@ from ortools.sat.python.cp_model import (
 
 
 transit_times = {
+    "STA": {
+        "CAM": 20,
+        "EVR": 15,
+        "FLH": 15,
+        "VUE": 15,
+    },
     "CAM": {
         "EVR": 20,
         "FLH": 10,
+        "STA": 20,
         "VUE": 30,
     },
     "EVR": {
         "CAM": 20,
         "FLH": 20,
+        "STA": 15,
         "VUE": 10,
     },
     "FLH": {
         "CAM": 10,
         "EVR": 20,
+        "STA": 15,
         "VUE": 30,
     },
     "VUE": {
         "CAM": 30,
         "EVR": 10,
         "FLH": 30,
+        "STA": 15,
     },
 }
+for prev, times in transit_times.items():
+    for next in times.keys():
+        assert transit_times[prev][next] == transit_times[next][prev]
 
 
 class Film(object):
