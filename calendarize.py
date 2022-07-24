@@ -170,12 +170,11 @@ class SolutionHandler(CpSolverSolutionCallback):
                 curr = events[i]
                 if prev and prev.begin.date() == curr.begin.date():
                     minutes_between = int((curr.begin - prev.end).total_seconds() / 60)
-                    transit_between = curr.minutes_from(prev)
-                    break_between = minutes_between - transit_between
+                    transit = self.Value(transits[i])
+                    downtime = minutes_between - transit
 
-                    transit = "none" if prev.venue == curr.venue else f"{transit_between}m to {curr.venue}"
-                    downtime = "none" if break_between <= 5 else f"{break_between}m"
-                    print(f" ... (transit: {transit}, downtime: {downtime})", end="")
+                    downtime = "none" if downtime <= 5 else f"{downtime}m"
+                    print(f" ... (transit: {transit}m, downtime: {downtime})", end="")
                 print()
                 print(f'{curr.begin} @ {curr.venue}: "{curr.title}"', end="")
                 prev = curr
