@@ -123,6 +123,12 @@ n = len(events)
 model = CpModel()
 attendance = model.NewIntVar(0, n, "attendance")
 appearances = [model.NewBoolVar(f"appearances[{i}]") for i in range(n)]
+commute = model.NewIntVar(0, 3600, "commute")
+transits = [model.NewIntVar(0, 60, f"transits[{i}]") for i in range(n)]
+
+model.Add(attendance == sum(appearances))
+model.Add(commute == sum(transits))
+
 
 # Constraints:
 #
@@ -142,8 +148,13 @@ for i in range(n):
             pair_selected = [appearances[i], appearances[j]]
             model.AddBoolAnd(no_overlaps + no_duplicates).OnlyEnforceIf(pair_selected)
 
-# Goal: maximize attendance
-model.Add(attendance == sum(appearances))
+            # For same-day events, accumulate transit times
+            if events[i].begin.date() == events[j].begin.date():
+                no_events_between = [appearances[b].Not() for b in range(i+1, j)]
+                transit_time = events[j].minutes_from(events[i])
+                model.Add(transits[j] == transit_time).OnlyEnforceIf(pair_selected + no_events_between)
+
+# Goal 1: maximize attendance
 model.Maximize(attendance)
 
 
@@ -151,6 +162,8 @@ class SolutionHandler(CpSolverSolutionCallback):
     def on_solution_callback(self):
         print(f"attendance: {self.Value(attendance)}")
         print(f"appearances: {[self.Value(appearances[i]) for i in range(n)]}")
+        print(f"commute: {self.Value(commute)}")
+        print(f"transits: {[self.Value(transits[i]) for i in range(n)]}")
         prev = None
         for i in range(n):
             if self.Value(appearances[i]):
@@ -170,4 +183,11 @@ class SolutionHandler(CpSolverSolutionCallback):
 
 
 solver = CpSolver()
+solver.Solve(model, solution_callback=SolutionHandler())
+
+
+# Goal 2: minimize commute
+model.Add(attendance == solver.Value(attendance))
+model.Minimize(commute)
+
 solver.Solve(model, solution_callback=SolutionHandler())
