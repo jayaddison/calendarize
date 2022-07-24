@@ -158,7 +158,7 @@ class SolutionHandler(CpSolverSolutionCallback):
         print(f"attendance: {self.Value(attendance)}")
         print(f"appearances: {[self.Value(appearances[i]) for i in range(n)]}")
         print(f"commute: {self.Value(commute)}")
-        print(f"transits: {[self.Value(transits[i]) for i in range(n)]}")
+        print(f"transits: {[self.Value(transits[i]) for i in range(n)]}", end="")
         prev = None
         for i in range(n):
             if self.Value(appearances[i]):
@@ -170,6 +170,8 @@ class SolutionHandler(CpSolverSolutionCallback):
 
                     downtime = "none" if downtime <= 5 else f"{downtime}m"
                     print(f" ... (transit: {transit}m, downtime: {downtime})", end="")
+                else:
+                    print()
                 print()
                 print(f'{curr.begin} @ {curr.venue}: "{curr.title}"', end="")
                 prev = curr
