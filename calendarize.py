@@ -139,14 +139,9 @@ model.Add(commute == sum(transits))
 for i in range(n):
     for j in range(n):
         if i < j:
-            no_overlaps = [
-                events[j].begin >= events[j].eta_from(events[i]),
-            ]
-            no_duplicates = [
-                events[i].title != events[j].title,
-            ]
             pair_selected = [appearances[i], appearances[j]]
-            model.AddBoolAnd(no_overlaps + no_duplicates).OnlyEnforceIf(pair_selected)
+            model.Add(events[j].begin >= events[j].eta_from(events[i])).OnlyEnforceIf(pair_selected)
+            model.Add(events[i].title != events[j].title).OnlyEnforceIf(pair_selected)
 
             # For same-day events, accumulate transit times
             if events[i].begin.date() == events[j].begin.date():
