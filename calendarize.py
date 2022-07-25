@@ -64,12 +64,14 @@ venues = {
 
 
 class Event(object):
-    def __init__(self, title, begin, running_time, venue_id):
+    def __init__(self, title, begin, running_time, venue_id, url, description):
         self.title = title
         self.begin = timeparser.parse(begin)
         self.running_time = timedelta(minutes=running_time)
         self.end = self.begin + self.running_time
         self.venue = venues[venue_id]
+        self.url = url
+        self.description = description
 
     def minutes_from(self, prev: "Event"):
         if self.venue == prev.venue:
@@ -88,6 +90,8 @@ for event_data in json.loads(open("events.json", "r").read()):
             Event(
                 title=event_data["title"],
                 running_time=event_data["running_time"],
+                url=event_data["url"],
+                description=event_data["description"],
                 begin=occurrence_data["time"],
                 venue_id=occurrence_data["venue"],
             )
@@ -157,8 +161,8 @@ for i in range(n):
             "time": event.begin.strftime("%H:%M"),
             "title": event.title,
             "venue": event.venue.name,
-            "url": "http://example.org",
-            "description": "",
+            "url": event.url,
+            "description": event.description,
         }
     )
 
