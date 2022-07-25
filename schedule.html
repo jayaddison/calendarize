@@ -43,9 +43,9 @@ td.f
 {%-   for event in dates[date].events %}
       <tr>
 {%-     if loop.first and dates[date].events | length > 1 %}
-        <td class="d" {% if dates[date].is_weekend %}style="background-color: silver;"{% endif %} rowspan="{{ dates[date].events | length }}">{{ dates[date].heading }}</td>
+        <td class="d" {%- if dates[date].is_weekend %} style="background-color: silver;"{% endif %} rowspan="{{ dates[date].events | length }}">{{ dates[date].heading }}</td>
 {%-     elif dates[date].events | length == 1 %}
-        <td class="d" {% if dates[date].is_weekend %}style="background-color: silver;"{% endif %}>{{ dates[date].heading }}</td>
+        <td class="d" {%- if dates[date].is_weekend %} style="background-color: silver;"{% endif %}>{{ dates[date].heading }}</td>
 {%-     endif %}
         <td class="t">{{ event.time }}</td>
         <td class="v">{{ event.venue }}</td>
