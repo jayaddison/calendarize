@@ -6,7 +6,7 @@ from jinja2 import Environment, FileSystemLoader
 from ortools.sat.python.cp_model import CpModel, CpSolver
 
 
-# Transit times, assuming travel by bicycle and with a bit of faff time to find parking
+# Estimated venue transit times (by bicycle and allowing some time for parking)
 transit_times = {
     "STA": {
         "CAM": 20,
@@ -119,14 +119,14 @@ for i in range(n):
             model.Add(next.begin >= prev.eta_from(prev)).OnlyEnforceIf(chosen)
             model.Add(next.title != prev.title).OnlyEnforceIf(chosen)
 
-            # Don't add any transit-related constraints across events on different days
+            # Don't add transit-related constraints across date boundaries
             if prev.begin.date() != next.begin.date():
                 continue
 
             # Add transit time constraints
             adjacent = [appearances[b].Not() for b in range(i + 1, j)]
-            transit_time = next.minutes_from(prev)
-            model.Add(transits[j] == transit_time).OnlyEnforceIf(chosen + adjacent)
+            duration = next.minutes_from(prev)
+            model.Add(transits[j] == duration).OnlyEnforceIf(chosen + adjacent)
 
 # Goal 1: maximize attendance
 model.Maximize(attendance)
