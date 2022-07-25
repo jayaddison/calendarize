@@ -128,16 +128,15 @@ for i in range(n):
             duration = next.minutes_from(prev)
             model.Add(transits[j] == duration).OnlyEnforceIf(chosen + adjacent)
 
+solver = CpSolver()
+
 # Goal 1: maximize attendance
 model.Maximize(attendance)
-
-solver = CpSolver()
 solver.Solve(model)
 
-# Goal 2: minimize commute
+# Goal 2: minimize commute (while maintaining attendance target)
 model.Add(attendance == solver.Value(attendance))
 model.Minimize(commute)
-
 solver.Solve(model)
 
 dates = {}
