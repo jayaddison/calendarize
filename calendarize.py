@@ -83,12 +83,14 @@ class Event(object):
 events = []
 for event_data in json.loads(open("events.json", "r").read()):
     for occurrence_data in event_data["occurrences"]:
-        events.append(Event(
-            title=event_data["title"],
-            running_time=event_data["running_time"],
-            begin=occurrence_data["time"],
-            venue_id=occurrence_data["venue"],
-        ))
+        events.append(
+            Event(
+                title=event_data["title"],
+                running_time=event_data["running_time"],
+                begin=occurrence_data["time"],
+                venue_id=occurrence_data["venue"],
+            )
+        )
 events = sorted(events, key=lambda f: f.begin)
 n = len(events)
 
@@ -111,15 +113,19 @@ model.Add(commute == sum(transits))
 for i in range(n):
     for j in range(n):
         if i < j:
-            pair_selected = [appearances[i], appearances[j]]
-            model.Add(events[j].begin >= events[j].eta_from(events[i])).OnlyEnforceIf(pair_selected)
-            model.Add(events[i].title != events[j].title).OnlyEnforceIf(pair_selected)
+            chosen = [appearances[i], appearances[j]]
+            prev, next = events[i], events[j]
+            model.Add(next.begin >= prev.eta_from(prev)).OnlyEnforceIf(chosen)
+            model.Add(next.title != prev.title).OnlyEnforceIf(chosen)
 
-            # For same-day events, accumulate transit times
-            if events[i].begin.date() == events[j].begin.date():
-                no_events_between = [appearances[b].Not() for b in range(i+1, j)]
-                transit_time = events[j].minutes_from(events[i])
-                model.Add(transits[j] == transit_time).OnlyEnforceIf(pair_selected + no_events_between)
+            # Don't add any transit-related constraints across events on different days
+            if prev.begin.date() != next.begin.date():
+                continue
+
+            # Add transit time constraints
+            adjacent = [appearances[b].Not() for b in range(i + 1, j)]
+            transit_time = next.minutes_from(prev)
+            model.Add(transits[j] == transit_time).OnlyEnforceIf(chosen + adjacent)
 
 # Goal 1: maximize attendance
 model.Maximize(attendance)
