@@ -46,18 +46,33 @@ for prev, times in transit_times.items():
         assert transit_times[prev][next] == transit_times[next][prev]
 
 
+class Venue(object):
+    def __init__(self, id, name):
+        self.id = id
+        self.name = name
+
+
+venues = {
+    "CAM": Venue("CAM", "Cameo Cinema"),
+    "EVR": Venue("EVR", "Everyman Cinema"),
+    "FLH": Venue("FLH", "Filmhouse Cinema"),
+    "STA": Venue("STA", "St. Andrew Square"),
+    "VUE": Venue("VUE", "Vue Cinema"),
+}
+
+
 class Event(object):
-    def __init__(self, title, begin, running_time, venue):
+    def __init__(self, title, begin, running_time, venue_id):
         self.title = title
         self.begin = timeparser.parse(begin)
         self.running_time = timedelta(minutes=running_time)
         self.end = self.begin + self.running_time
-        self.venue = venue
+        self.venue = venues[venue_id]
 
     def minutes_from(self, prev: "Event"):
         if self.venue == prev.venue:
             return 5
-        return transit_times[prev.venue][self.venue]
+        return transit_times[prev.venue.id][self.venue.id]
 
     def eta_from(self, prev: "Event"):
         return prev.end + timedelta(minutes=self.minutes_from(prev))
@@ -66,55 +81,55 @@ class Event(object):
 # Screenings, sorted by start time
 events = sorted(
     [
-        Event(begin="2022-08-20 19:00", running_time=96, venue="VUE", title="After Yang"),
+        Event(begin="2022-08-20 19:00", running_time=96, venue_id="VUE", title="After Yang"),
 
-        Event(begin="2022-08-16 16:30", running_time=100, venue="VUE", title="Fogaréu"),
-        Event(begin="2022-08-17 19:00", running_time=100, venue="FLH", title="Fogaréu"),
+        Event(begin="2022-08-16 16:30", running_time=100, venue_id="VUE", title="Fogaréu"),
+        Event(begin="2022-08-17 19:00", running_time=100, venue_id="FLH", title="Fogaréu"),
 
-        Event(begin="2022-08-16 20:35", running_time=101, venue="FLH", title="Leonor Will Never Die"),
-        Event(begin="2022-08-18 15:30", running_time=101, venue="VUE", title="Leonor Will Never Die"),
+        Event(begin="2022-08-16 20:35", running_time=101, venue_id="FLH", title="Leonor Will Never Die"),
+        Event(begin="2022-08-18 15:30", running_time=101, venue_id="VUE", title="Leonor Will Never Die"),
 
-        Event(begin="2022-08-15 21:00", running_time=78, venue="EVR", title="LOLA"),
-        Event(begin="2022-08-19 16:00", running_time=78, venue="VUE", title="LOLA"),
+        Event(begin="2022-08-15 21:00", running_time=78, venue_id="EVR", title="LOLA"),
+        Event(begin="2022-08-19 16:00", running_time=78, venue_id="VUE", title="LOLA"),
 
-        Event(begin="2022-08-17 18:15", running_time=87, venue="VUE", title="Full Time"),
-        Event(begin="2022-08-18 16:00", running_time=87, venue="FLH", title="Full Time"),
+        Event(begin="2022-08-17 18:15", running_time=87, venue_id="VUE", title="Full Time"),
+        Event(begin="2022-08-18 16:00", running_time=87, venue_id="FLH", title="Full Time"),
 
-        Event(begin="2022-08-18 21:35", running_time=109, venue="VUE", title="Special Delivery"),
-        Event(begin="2022-08-19 16:20", running_time=109, venue="VUE", title="Special Delivery"),
+        Event(begin="2022-08-18 21:35", running_time=109, venue_id="VUE", title="Special Delivery"),
+        Event(begin="2022-08-19 16:20", running_time=109, venue_id="VUE", title="Special Delivery"),
 
-        Event(begin="2022-08-15 19:00", running_time=83, venue="CAM", title="Anonymous Club"),
-        Event(begin="2022-08-17 21:30", running_time=83, venue="VUE", title="Anonymous Club"),
+        Event(begin="2022-08-15 19:00", running_time=83, venue_id="CAM", title="Anonymous Club"),
+        Event(begin="2022-08-17 21:30", running_time=83, venue_id="VUE", title="Anonymous Club"),
 
-        Event(begin="2022-08-17 15:50", running_time=115, venue="VUE", title="Hallelujah"),
-        Event(begin="2022-08-20 16:50", running_time=115, venue="FLH", title="Hallelujah"),
+        Event(begin="2022-08-17 15:50", running_time=115, venue_id="VUE", title="Hallelujah"),
+        Event(begin="2022-08-20 16:50", running_time=115, venue_id="FLH", title="Hallelujah"),
 
-        Event(begin="2022-08-13 14:00", running_time=85, venue="VUE", title="The Territory"),
-        Event(begin="2022-08-19 18:00", running_time=85, venue="EVR", title="The Territory"),
+        Event(begin="2022-08-13 14:00", running_time=85, venue_id="VUE", title="The Territory"),
+        Event(begin="2022-08-19 18:00", running_time=85, venue_id="EVR", title="The Territory"),
 
-        Event(begin="2022-08-17 20:35", running_time=117, venue="VUE", title="The Forgiven"),
+        Event(begin="2022-08-17 20:35", running_time=117, venue_id="VUE", title="The Forgiven"),
 
-        Event(begin="2022-08-18 19:00", running_time=114, venue="VUE", title="The Score"),
-        Event(begin="2022-08-20 13:30", running_time=114, venue="FLH", title="The Score"),
+        Event(begin="2022-08-18 19:00", running_time=114, venue_id="VUE", title="The Score"),
+        Event(begin="2022-08-20 13:30", running_time=114, venue_id="FLH", title="The Score"),
 
-        Event(begin="2022-08-15 21:10", running_time=104, venue="VUE", title="AEIOU"),
-        Event(begin="2022-08-16 14:00", running_time=104, venue="FLH", title="AEIOU"),
+        Event(begin="2022-08-15 21:10", running_time=104, venue_id="VUE", title="AEIOU"),
+        Event(begin="2022-08-16 14:00", running_time=104, venue_id="FLH", title="AEIOU"),
 
-        Event(begin="2022-08-14 17:30", running_time=112, venue="VUE", title="Axiom"),
-        Event(begin="2022-08-16 11:30", running_time=112, venue="VUE", title="Axiom"),
+        Event(begin="2022-08-14 17:30", running_time=112, venue_id="VUE", title="Axiom"),
+        Event(begin="2022-08-16 11:30", running_time=112, venue_id="VUE", title="Axiom"),
 
-        Event(begin="2022-08-14 14:15", running_time=97, venue="VUE", title="Phantom Project"),
-        Event(begin="2022-08-15 21:20", running_time=97, venue="CAM", title="Phantom Project"),
+        Event(begin="2022-08-14 14:15", running_time=97, venue_id="VUE", title="Phantom Project"),
+        Event(begin="2022-08-15 21:20", running_time=97, venue_id="CAM", title="Phantom Project"),
 
-        Event(begin="2022-08-13 18:30", running_time=180, venue="FLH", title="The Plains"),
+        Event(begin="2022-08-13 18:30", running_time=180, venue_id="FLH", title="The Plains"),
 
-        Event(begin="2022-08-16 18:30", running_time=56, venue="VUE", title="Shadow"),
+        Event(begin="2022-08-16 18:30", running_time=56, venue_id="VUE", title="Shadow"),
 
-        Event(begin="2022-08-14 15:40", running_time=68, venue="FLH", title="EIFF New Visions"),
+        Event(begin="2022-08-14 15:40", running_time=68, venue_id="FLH", title="EIFF New Visions"),
 
-        Event(begin="2022-08-13 15:30", running_time=79, venue="FLH", title="Scotland's Voices"),
+        Event(begin="2022-08-13 15:30", running_time=79, venue_id="FLH", title="Scotland's Voices"),
 
-        Event(begin="2022-08-14 11:30", running_time=60, venue="FLH", title="The Making of A Bear Named Wojtek"),
+        Event(begin="2022-08-14 11:30", running_time=60, venue_id="FLH", title="The Making of A Bear Named Wojtek"),
     ],
     key=lambda f: f.begin,
 )
@@ -173,7 +188,7 @@ class SolutionHandler(CpSolverSolutionCallback):
                 else:
                     print()
                 print()
-                print(f'{curr.begin} @ {curr.venue}: "{curr.title}"', end="")
+                print(f'{curr.begin} @ {curr.venue.id}: "{curr.title}"', end="")
                 prev = curr
         print()
 
