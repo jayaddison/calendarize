@@ -153,8 +153,8 @@ for i in range(n):
     if date not in dates:
         dates[date] = {
             "heading": event.begin.strftime("%d %b"),
-            "events": [],
             "is_weekend": event.begin.weekday() in [5, 6],
+            "events": [],
         }
     dates[date]["events"].append(
         {
