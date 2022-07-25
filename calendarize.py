@@ -3,11 +3,7 @@ from dateutil import parser as timeparser
 import json
 
 from jinja2 import Environment, FileSystemLoader
-from ortools.sat.python.cp_model import (
-    CpModel,
-    CpSolver,
-    CpSolverSolutionCallback,
-)
+from ortools.sat.python.cp_model import CpModel, CpSolver
 
 
 # Transit times, assuming travel by bicycle and with a bit of faff time to find parking
