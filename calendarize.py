@@ -1,5 +1,6 @@
 from datetime import timedelta
 from dateutil import parser as timeparser
+import json
 
 from ortools.sat.python.cp_model import (
     CpModel,
@@ -79,60 +80,16 @@ class Event(object):
 
 
 # Screenings, sorted by start time
-events = sorted(
-    [
-        Event(begin="2022-08-20 19:00", running_time=96, venue_id="VUE", title="After Yang"),
-
-        Event(begin="2022-08-16 16:30", running_time=100, venue_id="VUE", title="Fogaréu"),
-        Event(begin="2022-08-17 19:00", running_time=100, venue_id="FLH", title="Fogaréu"),
-
-        Event(begin="2022-08-16 20:35", running_time=101, venue_id="FLH", title="Leonor Will Never Die"),
-        Event(begin="2022-08-18 15:30", running_time=101, venue_id="VUE", title="Leonor Will Never Die"),
-
-        Event(begin="2022-08-15 21:00", running_time=78, venue_id="EVR", title="LOLA"),
-        Event(begin="2022-08-19 16:00", running_time=78, venue_id="VUE", title="LOLA"),
-
-        Event(begin="2022-08-17 18:15", running_time=87, venue_id="VUE", title="Full Time"),
-        Event(begin="2022-08-18 16:00", running_time=87, venue_id="FLH", title="Full Time"),
-
-        Event(begin="2022-08-18 21:35", running_time=109, venue_id="VUE", title="Special Delivery"),
-        Event(begin="2022-08-19 16:20", running_time=109, venue_id="VUE", title="Special Delivery"),
-
-        Event(begin="2022-08-15 19:00", running_time=83, venue_id="CAM", title="Anonymous Club"),
-        Event(begin="2022-08-17 21:30", running_time=83, venue_id="VUE", title="Anonymous Club"),
-
-        Event(begin="2022-08-17 15:50", running_time=115, venue_id="VUE", title="Hallelujah"),
-        Event(begin="2022-08-20 16:50", running_time=115, venue_id="FLH", title="Hallelujah"),
-
-        Event(begin="2022-08-13 14:00", running_time=85, venue_id="VUE", title="The Territory"),
-        Event(begin="2022-08-19 18:00", running_time=85, venue_id="EVR", title="The Territory"),
-
-        Event(begin="2022-08-17 20:35", running_time=117, venue_id="VUE", title="The Forgiven"),
-
-        Event(begin="2022-08-18 19:00", running_time=114, venue_id="VUE", title="The Score"),
-        Event(begin="2022-08-20 13:30", running_time=114, venue_id="FLH", title="The Score"),
-
-        Event(begin="2022-08-15 21:10", running_time=104, venue_id="VUE", title="AEIOU"),
-        Event(begin="2022-08-16 14:00", running_time=104, venue_id="FLH", title="AEIOU"),
-
-        Event(begin="2022-08-14 17:30", running_time=112, venue_id="VUE", title="Axiom"),
-        Event(begin="2022-08-16 11:30", running_time=112, venue_id="VUE", title="Axiom"),
-
-        Event(begin="2022-08-14 14:15", running_time=97, venue_id="VUE", title="Phantom Project"),
-        Event(begin="2022-08-15 21:20", running_time=97, venue_id="CAM", title="Phantom Project"),
-
-        Event(begin="2022-08-13 18:30", running_time=180, venue_id="FLH", title="The Plains"),
-
-        Event(begin="2022-08-16 18:30", running_time=56, venue_id="VUE", title="Shadow"),
-
-        Event(begin="2022-08-14 15:40", running_time=68, venue_id="FLH", title="EIFF New Visions"),
-
-        Event(begin="2022-08-13 15:30", running_time=79, venue_id="FLH", title="Scotland's Voices"),
-
-        Event(begin="2022-08-14 11:30", running_time=60, venue_id="FLH", title="The Making of A Bear Named Wojtek"),
-    ],
-    key=lambda f: f.begin,
-)
+events = []
+for event_data in json.loads(open("events.json", "r").read()):
+    for occurrence_data in event_data["occurrences"]:
+        events.append(Event(
+            title=event_data["title"],
+            running_time=event_data["running_time"],
+            begin=occurrence_data["time"],
+            venue_id=occurrence_data["venue"],
+        ))
+events = sorted(events, key=lambda f: f.begin)
 n = len(events)
 
 model = CpModel()
