@@ -2,6 +2,7 @@ from datetime import timedelta
 from dateutil import parser as timeparser
 import json
 
+from jinja2 import Environment, FileSystemLoader
 from ortools.sat.python.cp_model import (
     CpModel,
     CpSolver,
@@ -130,38 +131,40 @@ for i in range(n):
 # Goal 1: maximize attendance
 model.Maximize(attendance)
 
-
-class SolutionHandler(CpSolverSolutionCallback):
-    def on_solution_callback(self):
-        print(f"attendance: {self.Value(attendance)}")
-        print(f"appearances: {[self.Value(appearances[i]) for i in range(n)]}")
-        print(f"commute: {self.Value(commute)}")
-        print(f"transits: {[self.Value(transits[i]) for i in range(n)]}", end="")
-        prev = None
-        for i in range(n):
-            if self.Value(appearances[i]):
-                curr = events[i]
-                if prev and prev.begin.date() == curr.begin.date():
-                    minutes_between = int((curr.begin - prev.end).total_seconds() / 60)
-                    transit = self.Value(transits[i])
-                    downtime = minutes_between - transit
-
-                    downtime = "none" if downtime <= 5 else f"{downtime}m"
-                    print(f" ... (transit: {transit}m, downtime: {downtime})", end="")
-                else:
-                    print()
-                print()
-                print(f'{curr.begin} @ {curr.venue.id}: "{curr.title}"', end="")
-                prev = curr
-        print()
-
-
 solver = CpSolver()
-solver.Solve(model, solution_callback=SolutionHandler())
-
+solver.Solve(model)
 
 # Goal 2: minimize commute
 model.Add(attendance == solver.Value(attendance))
 model.Minimize(commute)
 
-solver.Solve(model, solution_callback=SolutionHandler())
+solver.Solve(model)
+
+dates = {}
+for i in range(n):
+    if not solver.Value(appearances[i]):
+        continue
+    event = events[i]
+    date = event.begin.date().strftime("%Y-%m-%d")
+    if date not in dates:
+        dates[date] = {
+            "heading": event.begin.strftime("%d %b"),
+            "events": [],
+            "is_weekend": event.begin.weekday() in [5, 6],
+        }
+    dates[date]["events"].append(
+        {
+            "time": event.begin.strftime("%H:%M"),
+            "title": event.title,
+            "venue": event.venue.name,
+            "url": "http://example.org",
+            "description": "",
+        }
+    )
+
+# Render the suggested schedule using an HTML template
+env = Environment(loader=FileSystemLoader("."))
+template = env.get_template("schedule.html")
+html = template.render(dates=dates)
+
+print(html)

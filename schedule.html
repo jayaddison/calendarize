@@ -1,0 +1,59 @@
+<html>
+  <head>
+    <title>EIFF 2022 Itinerary</title>
+    <style>
+table
+{
+    border: solid 1px silver;
+    font-size: 12px;
+}
+
+th
+{
+    border-bottom: solid 1px silver;
+}
+
+td
+{
+    vertical-align: top;
+    padding: 2px;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+td.f
+{
+    font-style: italic;
+}
+    </style>
+  </head>
+  <body>
+    <table>
+      <tr>
+        <th colspan="5">Edinburgh International Film Festival 2022 - 12-20th August 2022</th>
+      </tr>
+      <tr>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Venue</th>
+        <th>Event</th>
+        <th>Description</th>
+      </tr>
+{%- for date in dates %}
+{%-   for event in dates[date].events %}
+      <tr>
+{%-     if loop.first and dates[date].events | length > 1 %}
+        <td class="d" {% if dates[date].is_weekend %}style="background-color: silver;"{% endif %} rowspan="{{ dates[date].events | length }}">{{ dates[date].heading }}</td>
+{%-     elif dates[date].events | length == 1 %}
+        <td class="d" {% if dates[date].is_weekend %}style="background-color: silver;"{% endif %}>{{ dates[date].heading }}</td>
+{%-     endif %}
+        <td class="t">{{ event.time }}</td>
+        <td class="v">{{ event.venue }}</td>
+        <td class="e"><a href="{{ event.url }}">{{ event.title }}</a></td>
+        <td class="i">{{ event.description }}</td>
+      </tr>
+{%-   endfor %}
+{%- endfor %}
+    </table>
+  </body>
+</html>
